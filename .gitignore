@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Env / secrets
+.env
+
+# OS
+.DS_Store
+
+# Eval run outputs
+results/
+
+# Local task spec (not part of the public portfolio)
+src/evals/TASKS.md
