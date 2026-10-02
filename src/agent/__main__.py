@@ -41,6 +41,9 @@ def main() -> None:
 
     result = agent.run(question)
 
+    from .observability import flush
+    flush()
+
     print(result.final_text)
 
     if args.trace:

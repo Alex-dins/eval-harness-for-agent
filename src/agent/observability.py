@@ -42,3 +42,20 @@ if langfuse_enabled():
     from langfuse import observe as observe  # re-export the real decorator
 else:
     observe = _identity_observe
+
+
+def flush() -> None:
+    """Flush pending traces to Langfuse. No-op when tracing is disabled.
+
+    Short-lived CLI processes can exit before the background exporter sends its
+    batch, so call this before the program ends to guarantee traces are shipped.
+    """
+    if not langfuse_enabled():
+        return
+    try:
+        from langfuse import get_client
+
+        get_client().flush()
+    except Exception:
+        # Observability must never break the actual run.
+        pass

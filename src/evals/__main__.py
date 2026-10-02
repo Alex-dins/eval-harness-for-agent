@@ -72,6 +72,9 @@ def main() -> None:
 
     results = run_cases(cases, agent, judge=judge)
 
+    from agent.observability import flush
+    flush()
+
     print_table(results)
     out_path = write_json(results, args.out)
     print(f"\nWrote {out_path}")
