@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Callable
 
 from agent.agent import Agent, AgentResult
+from agent.observability import mark_case, trace_case
 
 from . import scorers
 from .schema import Case, CaseResult, CheckResult
@@ -38,42 +39,54 @@ def _tool_calls_as_dicts(result: AgentResult) -> list[dict]:
 
 
 def run_case(case: Case, agent: Agent, judge: Judge | None = None) -> CaseResult:
-    """Run one case and score it. Never raises — agent errors become a failed check."""
-    try:
-        result = agent.run(case.input)
-    except Exception as exc:
+    """Run one case and score it. Never raises — agent errors become a failed check.
+
+    Each case runs inside its own Langfuse trace (named by case id), and the
+    pass/fail outcome is recorded on that trace so failures are filterable.
+    """
+    with trace_case(case.id, case.input) as span:
+        try:
+            result = agent.run(case.input)
+        except Exception as exc:
+            mark_case(span, passed=False, final_text="", failed_checks=["agent_error"])
+            return CaseResult(
+                case_id=case.id,
+                category=case.category,
+                passed=False,
+                checks=[
+                    CheckResult(name="agent_error", passed=False, detail=repr(exc))
+                ],
+                final_text="",
+                tool_calls=[],
+                stopped_reason="error",
+            )
+
+        checks: list[CheckResult] = []
+        for scorer in _OPT_IN_SCORERS:
+            check = scorer(case, result)
+            if check is not None:
+                checks.append(check)
+
+        if judge is not None:
+            judged = judge(case, result)
+            if judged is not None:
+                checks.append(judged)
+
+        checks.append(scorers.check_not_stalled(case, result))
+
+        passed = all(c.passed for c in checks)
+        failed_checks = [c.name for c in checks if not c.passed]
+        mark_case(span, passed, result.final_text, failed_checks)
+
         return CaseResult(
             case_id=case.id,
             category=case.category,
-            passed=False,
-            checks=[CheckResult(name="agent_error", passed=False, detail=repr(exc))],
-            final_text="",
-            tool_calls=[],
-            stopped_reason="error",
+            passed=passed,
+            checks=checks,
+            final_text=result.final_text,
+            tool_calls=_tool_calls_as_dicts(result),
+            stopped_reason=result.stopped_reason,
         )
-
-    checks: list[CheckResult] = []
-    for scorer in _OPT_IN_SCORERS:
-        check = scorer(case, result)
-        if check is not None:
-            checks.append(check)
-
-    if judge is not None:
-        judged = judge(case, result)
-        if judged is not None:
-            checks.append(judged)
-
-    checks.append(scorers.check_not_stalled(case, result))
-
-    return CaseResult(
-        case_id=case.id,
-        category=case.category,
-        passed=all(c.passed for c in checks),
-        checks=checks,
-        final_text=result.final_text,
-        tool_calls=_tool_calls_as_dicts(result),
-        stopped_reason=result.stopped_reason,
-    )
 
 
 def run_cases(

@@ -44,6 +44,56 @@ else:
     observe = _identity_observe
 
 
+from contextlib import contextmanager
+
+
+@contextmanager
+def trace_case(name: str, user_input: str):
+    """Open a Langfuse trace for one eval case (named by case id).
+
+    The agent run executes inside this context, so `agent.run` and its model/tool
+    spans nest under one trace per case. Yields the span (or None when disabled).
+    """
+    if not langfuse_enabled():
+        yield None
+        return
+    from langfuse import get_client
+
+    with get_client().start_as_current_observation(name=name) as span:
+        try:
+            span.set_trace_io(input=user_input)
+        except Exception:
+            pass
+        yield span
+
+
+def mark_case(span, passed: bool, final_text: str, failed_checks: list[str]) -> None:
+    """Record the case outcome on its trace so it's filterable in Langfuse.
+
+    Sets the observation level to ERROR on failure (shown as the trace Status) and
+    attaches a numeric `passed` score. No-op when tracing is disabled.
+    """
+    if span is None:
+        return
+    try:
+        span.update(
+            level="DEFAULT" if passed else "ERROR",
+            status_message=(
+                "passed" if passed else "failed: " + ", ".join(failed_checks)
+            ),
+            output=final_text,
+        )
+        span.set_trace_io(output=final_text)
+        span.score_trace(
+            name="passed",
+            value=1 if passed else 0,
+            comment=None if passed else ", ".join(failed_checks),
+        )
+    except Exception:
+        # Observability must never break scoring.
+        pass
+
+
 def flush() -> None:
     """Flush pending traces to Langfuse. No-op when tracing is disabled.
 

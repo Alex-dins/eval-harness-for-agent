@@ -109,6 +109,28 @@ were genuine agent problems, not harness bugs:
 
 Reproduce with `uv run evals` (a full JSON report lands in `results/`).
 
+## Observability (Langfuse)
+
+Every agent run is traced with [Langfuse](https://langfuse.com). Tracing is
+optional — it activates only when `LANGFUSE_*` keys are set, and is a no-op
+otherwise (see `src/agent/observability.py`).
+
+![Langfuse traces of the eval suite](docs/langfuse-trace.png)
+
+Each eval case runs inside its own trace (named by case id) that nests the
+`agent.run` span, the model calls (`OpenAI-generation`, captured via the
+`langfuse.openai` wrapper with full prompts/responses), and the `tool` spans
+(`search_kb`, `read_article`, …). You can see exactly why a case behaved as it did
+— e.g. that `correctness-sso-providers` called `search_kb` three times but never
+read the article.
+
+The runner also writes the **outcome** back to each trace: failed cases are marked
+with level `ERROR` (shown in the Status column, so you can filter the suite down to
+failures), and every case gets a numeric `passed` score (1/0) for dashboards.
+
+To enable it, set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and
+`LANGFUSE_HOST` in `.env`, then run `uv run evals`.
+
 ## Design notes
 
 - **Why no framework?** Evals need the full trajectory; frameworks hide it. A
