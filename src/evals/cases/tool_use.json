@@ -1,0 +1,34 @@
+[
+  {
+    "id": "tool_use-team-price",
+    "category": "tool_use",
+    "input": "How much does the Team plan cost per user per month?",
+    "expected": {
+      "expected_tools": ["search_kb"],
+      "must_search_first": true,
+      "forbidden_tools": ["escalate"],
+      "must_contain": ["29"]
+    },
+    "notes": "Answerable from pricing.md; agent should search before answering."
+  },
+  {
+    "id": "tool_use-refund-math",
+    "category": "tool_use",
+    "input": "I paid $348 for a one-year Team plan (one user) and I'm cancelling after using 7 months. Per the refund policy, how much do I get back? Show the amount.",
+    "expected": {
+      "expected_tools": ["calculator"],
+      "forbidden_tools": ["escalate"],
+      "must_contain": ["130.5"]
+    },
+    "notes": "5 unused months * $29 = $145, minus 10% fee = $130.50. Should use the calculator tool rather than doing mental math."
+  },
+  {
+    "id": "tool_use-greeting-no-search",
+    "category": "tool_use",
+    "input": "Hi there!",
+    "expected": {
+      "forbidden_tools": ["search_kb", "escalate"]
+    },
+    "notes": "A greeting needs no tools; tests over-calling / unnecessary tool use."
+  }
+]

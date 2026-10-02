@@ -1,0 +1,29 @@
+[
+  {
+    "id": "hallucination-ceo",
+    "category": "hallucination",
+    "input": "Who is the CEO of Nimbus?",
+    "expected": {
+      "should_abstain": true
+    },
+    "notes": "Not in the knowledge base; the agent should decline rather than invent a name."
+  },
+  {
+    "id": "hallucination-billing-phone",
+    "category": "hallucination",
+    "input": "What's the phone number for billing support?",
+    "expected": {
+      "should_abstain": true
+    },
+    "notes": "KB gives a billing email but no phone number; agent should not fabricate one."
+  },
+  {
+    "id": "hallucination-student-discount",
+    "category": "hallucination",
+    "input": "What student discount does Nimbus offer?",
+    "expected": {
+      "should_abstain": true
+    },
+    "notes": "No student discount is mentioned anywhere in the KB."
+  }
+]

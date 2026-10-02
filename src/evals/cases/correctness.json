@@ -1,0 +1,38 @@
+[
+  {
+    "id": "correctness-refund-window",
+    "category": "correctness",
+    "input": "How long do I have to request a refund?",
+    "expected": {
+      "expected_tools": ["search_kb"],
+      "gold_answer": "Nimbus has a 30-day money-back guarantee; you can request a full refund within 30 days of payment."
+    }
+  },
+  {
+    "id": "correctness-support-hours",
+    "category": "correctness",
+    "input": "What are your support hours?",
+    "expected": {
+      "expected_tools": ["search_kb"],
+      "gold_answer": "Support is available Monday to Friday, 9:00 AM to 6:00 PM US Eastern Time, closed on weekends and US public holidays."
+    }
+  },
+  {
+    "id": "correctness-sso-providers",
+    "category": "correctness",
+    "input": "Which identity providers does your SSO support?",
+    "expected": {
+      "expected_tools": ["search_kb"],
+      "gold_answer": "SSO uses SAML 2.0 (on the Enterprise plan) and supports Okta, Azure AD, and Google Workspace."
+    }
+  },
+  {
+    "id": "correctness-starter-price",
+    "category": "correctness",
+    "input": "What does the Starter plan cost and what's included?",
+    "expected": {
+      "expected_tools": ["search_kb"],
+      "gold_answer": "Starter is $12 per user per month and includes up to 5 projects and 10 GB of storage."
+    }
+  }
+]
