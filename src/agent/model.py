@@ -51,8 +51,14 @@ class OpenAIModel:
     """
 
     def __init__(self, model: str | None = None, temperature: float = 0.0):
-        # langfuse.openai is a drop-in wrapper around openai.OpenAI.
-        from langfuse.openai import OpenAI
+        # Use the Langfuse-traced OpenAI client only when Langfuse is configured;
+        # otherwise the plain client, so we never attempt to export traces.
+        from .observability import langfuse_enabled
+
+        if langfuse_enabled():
+            from langfuse.openai import OpenAI
+        else:
+            from openai import OpenAI
 
         self.model = model or os.getenv("AGENT_MODEL", "gpt-4o-mini")
         self.temperature = temperature

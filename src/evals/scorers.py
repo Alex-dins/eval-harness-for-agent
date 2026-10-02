@@ -107,6 +107,10 @@ def check_must_not_contain(case: Case, result: AgentResult) -> CheckResult | Non
 _ABSTAIN_MARKERS = (
     "i don't know",
     "i do not know",
+    "i don't have",
+    "i do not have",
+    "don't have the",
+    "do not have the",
     "i'm not sure",
     "i am not sure",
     "not in our",
@@ -118,7 +122,9 @@ _ABSTAIN_MARKERS = (
     "no information",
     "unable to find",
     "contact support",
+    "contacting",
     "reach out to support",
+    "recommend contacting",
 )
 
 

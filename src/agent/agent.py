@@ -13,8 +13,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from langfuse import observe
-
+from .observability import observe
 from .kb import KnowledgeBase
 from .model import ModelClient, ToolCall
 from .tools import ToolRegistry, build_default_tools
